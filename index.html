@@ -190,8 +190,11 @@
             mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 -2.2 1.7'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     opacity:0;
   }
-  /* over the white column of the front page: red on the colored sidebar disappears */
-  .stamp.hired{ left:71%; top:57%; transform:translate(-50%,-50%) rotate(-13deg); }
+  /* Red ink disappears on the colored sidebar, so the stamp has to fit inside the white
+     column of the front page: that column spans ~37% to ~80% of the fan. The font follows
+     the fan's width (cqw), so the stamp never grows past the column on any screen. */
+  .fan{ container-type:inline-size; }
+  .stamp.hired{ left:59%; top:57%; font-size:7.2cqw; transform:translate(-50%,-50%) rotate(-13deg); }
   .fan.open .stamp.hired{ animation:slam .55s 1.35s cubic-bezier(.3,1.4,.5,1) forwards; }
   @keyframes slam{
     0%  { opacity:0; transform:translate(-50%,-50%) rotate(-13deg) scale(2.3); }
