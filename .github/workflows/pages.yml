@@ -1,0 +1,39 @@
+# Publishes the site (index.html, SKILL.md, templates, scripts, the zip) to GitHub Pages
+# on every push to main. Pages is set to "GitHub Actions" as its source.
+# The zip is rebuilt here, so the one people download always matches SKILL.md.
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rebuild fired-cv.zip from the current skill
+        run: node scripts/pack.mjs
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
