@@ -1,0 +1,11 @@
+# fired.cv
+
+> Fired by AI. CV by AI. A resume skill for AI agents. Builds a one-page, parser-proof A4 PDF resume (and an optional cover letter) from an old Word file, a PDF, a LinkedIn export or an interview, tailored to one job posting or one CV per posting. Nothing invented.
+
+If you are an AI agent asked to use this project, fetch and follow SKILL.md. The templates and scripts it mentions live next to it.
+
+- [SKILL.md](SKILL.md): the full instructions
+- [templates/sidebar.html](templates/sidebar.html): two-column template with photo
+- [templates/classic.html](templates/classic.html): one-column template, safest for tracking systems
+- [scripts/build.mjs](scripts/build.mjs): HTML to PDF with text-layer checks (Node 18+, Chrome/Edge)
+- [scripts/extract.mjs](scripts/extract.mjs): old resume (.docx, .odt, .pdf) to plain text

@@ -1,0 +1,955 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Served at /fired-cv on two hosts (www.sapiensinteticos.com/fired-cv proxies the repo's
+     GitHub Pages at inhabitants.github.io/fired-cv/). The Sapiens host strips the trailing
+     slash, so relative files need a base. Opened as a local file, it keeps relative paths. -->
+<script>if (location.protocol !== 'file:') document.write('<base href="/fired-cv/">');</script>
+<link rel="canonical" href="https://www.sapiensinteticos.com/fired-cv">
+<title>fired.cv: fired by AI, CV by AI</title>
+<meta name="description" content="A free skill for Claude and any AI agent. Hand it your old Word resume, get back a one-page PDF that looks expensive, reads clean to HR robots, and can be tailored to every job you apply for.">
+<meta property="og:title" content="fired.cv">
+<meta property="og:description" content="Fired by AI. CV by AI. A free resume skill for Claude and any AI agent.">
+<meta property="og:image" content="https://www.sapiensinteticos.com/fired-cv/site/img/sidebar-ember.jpg">
+<meta property="og:url" content="https://www.sapiensinteticos.com/fired-cv">
+<link rel="alternate" type="text/markdown" href="SKILL.md" title="Instructions for AI agents">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='6' y='6' width='52' height='52' rx='8' fill='none' stroke='%23D42A2A' stroke-width='6'/%3E%3Ctext x='32' y='43' font-family='Arial Black,Arial' font-weight='900' font-size='26' text-anchor='middle' fill='%23D42A2A'%3ECV%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:   #F3EFE6;
+    --paper-2: #EAE4D6;
+    --card:    #FBF9F4;
+    --ink:     #141310;
+    --ink-2:   #45413A;
+    --muted:   #7A7466;
+    --line:    #D8D0BE;
+    --red:     #D42A2A;
+    --red-ink: #B01F1F;
+    --marker:  #FFD84D;
+    --serif: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+    --sans:  'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono:  'IBM Plex Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+    --wide:  'Archivo', 'Arial Black', system-ui, sans-serif;
+    --max: 1180px;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; scroll-padding-top:80px; }
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font:400 17px/1.55 var(--sans);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  img{ max-width:100%; height:auto; display:block; }
+  a{ color:inherit; }
+  [hidden]{ display:none !important; }
+
+  /* two languages live side by side; the root attribute hides one */
+  html[data-lang="en"] [lang="pt"],
+  html[data-lang="pt"] [lang="en"]{ display:none !important; }
+
+  .wrap{ max-width:var(--max); margin:0 auto; padding:0 28px; }
+
+  /* faint ruled-paper texture on the page */
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(212,42,42,.07), transparent 60%),
+      repeating-linear-gradient(0deg, rgba(20,19,16,.028) 0 1px, transparent 1px 34px);
+  }
+  main, header, footer{ position:relative; z-index:1; }
+
+  /* ============================ NAV ============================ */
+  .nav{
+    position:sticky; top:0; z-index:20;
+    background:color-mix(in srgb, var(--paper) 86%, transparent);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid transparent;
+    transition:border-color .3s;
+  }
+  .nav.scrolled{ border-bottom-color:var(--line); }
+  .nav .wrap{ display:flex; align-items:center; gap:28px; height:66px; }
+  .brand{ display:flex; align-items:center; gap:10px; text-decoration:none; }
+  .brand-mark{
+    font:900 12px/1 var(--wide); font-stretch:112%;
+    color:var(--red); border:2.5px solid var(--red); border-radius:4px;
+    padding:5px 5px 4px; transform:rotate(-8deg); letter-spacing:.02em;
+  }
+  .brand-name{ font:400 25px/1 var(--serif); letter-spacing:-.01em; }
+  .brand-name em{ font-style:italic; color:var(--red); }
+  .nav-links{ display:flex; gap:22px; margin-left:auto; }
+  .nav-links a{ font:500 14px/1 var(--sans); color:var(--ink-2); text-decoration:none; }
+  .nav-links a:hover{ color:var(--ink); }
+  .lang{
+    display:flex; border:1px solid var(--line); border-radius:999px; padding:3px;
+    font:600 12px/1 var(--mono);
+  }
+  .lang button{
+    border:0; background:none; color:var(--muted); padding:6px 9px; border-radius:999px; cursor:pointer; font:inherit;
+  }
+  .lang button[aria-pressed="true"]{ background:var(--ink); color:var(--paper); }
+  .gh{
+    font:600 13px/1 var(--sans); text-decoration:none; padding:9px 14px; border-radius:999px;
+    background:var(--ink); color:var(--paper);
+  }
+
+  /* ============================ HERO ============================ */
+  .hero{ padding:56px 0 40px; }
+  .hero .wrap{ display:grid; grid-template-columns:1.05fr .95fr; gap:40px; align-items:center; }
+  .memo-line{
+    font:500 13px/1.5 var(--mono); color:var(--muted); margin:0 0 22px;
+    display:flex; flex-wrap:wrap; gap:4px 12px; align-items:baseline;
+  }
+  .memo-line s{ text-decoration:none; position:relative; }
+  .memo-line s::after{
+    content:""; position:absolute; left:-2px; right:-2px; top:52%; height:2px; background:var(--red);
+    transform:scaleX(0); transform-origin:left; animation:strike .6s .5s cubic-bezier(.7,0,.2,1) forwards;
+  }
+  .memo-line b{ color:var(--ink); font-weight:600; opacity:0; animation:fadein .4s 1.05s forwards; }
+  @keyframes strike{ to{ transform:scaleX(1); } }
+  @keyframes fadein{ to{ opacity:1; } }
+
+  h1{
+    font:400 clamp(3.4rem, 7.4vw, 7.2rem)/.92 var(--serif);
+    letter-spacing:-.025em; margin:0 0 26px;
+  }
+  html[data-lang="pt"] h1{ font-size:clamp(2.7rem, 5.3vw, 5.3rem); }
+  h1 em, h2 em{
+    font-style:italic;
+    background:linear-gradient(transparent 62%, var(--marker) 62% 92%, transparent 92%) no-repeat;
+    background-size:0% 100%;
+    animation:marker .9s 1.3s cubic-bezier(.6,0,.2,1) forwards;
+    padding:0 .06em; margin:0 -.06em;
+    -webkit-box-decoration-break:clone; box-decoration-break:clone;
+  }
+  h2 em{ animation:none; background-size:100% 100%; }
+  @keyframes marker{ to{ background-size:100% 100%; } }
+
+  .lede{ font-size:clamp(1.05rem, 1.5vw, 1.25rem); color:var(--ink-2); max-width:34ch; margin:0 0 30px; }
+
+  .cmd{
+    background:var(--ink); color:#F3EFE6; border-radius:14px; padding:14px 14px 14px 18px;
+    display:flex; align-items:center; gap:14px; max-width:560px;
+    box-shadow:0 14px 34px -18px rgba(20,19,16,.55);
+  }
+  .cmd-label{ display:block; font:500 11px/1 var(--mono); color:#A7A091; text-transform:uppercase; letter-spacing:.08em; margin-bottom:7px; }
+  .cmd code{ font:500 14.5px/1.45 var(--mono); color:#FFF; word-break:break-word; }
+  .cmd .body{ flex:1; min-width:0; }
+  .copy{
+    flex:none; border:0; cursor:pointer; border-radius:9px; padding:10px 14px;
+    background:var(--marker); color:var(--ink); font:700 13px/1 var(--sans);
+    transition:transform .15s;
+  }
+  .copy:active{ transform:scale(.95); }
+
+  .cta{ display:flex; flex-wrap:wrap; gap:12px; margin:18px 0 14px; }
+  .btn{
+    display:inline-flex; align-items:center; gap:9px; text-decoration:none;
+    font:600 15px/1 var(--sans); padding:14px 20px; border-radius:999px;
+    border:1.5px solid var(--ink); color:var(--ink); background:transparent;
+    transition:background .2s, color .2s, transform .2s;
+  }
+  .btn:hover{ transform:translateY(-2px); }
+  .btn.solid{ background:var(--red); border-color:var(--red); color:#fff; }
+  .btn.solid:hover{ background:var(--red-ink); border-color:var(--red-ink); }
+  .fine{ font:500 13px/1.5 var(--mono); color:var(--muted); margin:0; }
+
+  /* the fan of resumes */
+  .fan{ position:relative; width:100%; max-width:640px; aspect-ratio:1/1.04; margin-left:auto; }
+  .fan img{
+    position:absolute; width:61%; left:19.5%; top:4%;
+    border-radius:5px;
+    box-shadow:0 1px 0 rgba(0,0,0,.05), 0 22px 40px -22px rgba(20,19,16,.55);
+    transform-origin:50% 115%;
+    transform:rotate(0deg);
+    transition:transform 1s cubic-bezier(.2,.8,.2,1);
+  }
+  .fan.open img:nth-child(1){ transform:rotate(-17deg) translateX(-8%); transition-delay:.05s; }
+  .fan.open img:nth-child(2){ transform:rotate(-8.5deg) translateX(-4%); transition-delay:.12s; }
+  .fan.open img:nth-child(3){ transform:rotate(0deg); }
+  .fan.open img:nth-child(4){ transform:rotate(8.5deg) translateX(4%); transition-delay:.12s; }
+  .fan.open img:nth-child(5){ transform:rotate(17deg) translateX(8%); transition-delay:.05s; }
+  .fan img:nth-child(3){ z-index:3; }
+  .fan img:nth-child(2), .fan img:nth-child(4){ z-index:2; }
+
+  .stamp{
+    position:absolute; z-index:5;
+    font:900 clamp(2.6rem, 6vw, 4.6rem)/1 var(--wide); font-stretch:118%;
+    letter-spacing:.04em; color:var(--red);
+    border:.09em solid currentColor; border-radius:.12em; padding:.08em .3em .02em;
+    mix-blend-mode:multiply;
+    -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 -2.2 1.7'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 -2.2 1.7'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity:0;
+  }
+  /* over the white column of the front page: red on the colored sidebar disappears */
+  .stamp.hired{ left:71%; top:57%; transform:translate(-50%,-50%) rotate(-13deg); }
+  .fan.open .stamp.hired{ animation:slam .55s 1.35s cubic-bezier(.3,1.4,.5,1) forwards; }
+  @keyframes slam{
+    0%  { opacity:0; transform:translate(-50%,-50%) rotate(-13deg) scale(2.3); }
+    60% { opacity:.95; transform:translate(-50%,-50%) rotate(-13deg) scale(.94); }
+    100%{ opacity:.9; transform:translate(-50%,-50%) rotate(-13deg) scale(1); }
+  }
+  .note{
+    position:absolute; z-index:6; left:2%; top:4%;
+    background:var(--marker); color:var(--ink); padding:12px 14px 14px; width:150px;
+    font:500 13px/1.3 var(--mono); transform:rotate(-6deg);
+    box-shadow:0 10px 18px -12px rgba(20,19,16,.6);
+    opacity:0; animation:fadein .5s 1.9s forwards;
+  }
+  .note s{ text-decoration:line-through; text-decoration-color:var(--red); text-decoration-thickness:2px; }
+
+  /* ============================ MARQUEE ============================ */
+  .marquee{ border-block:1px solid var(--ink); overflow:hidden; background:var(--ink); color:var(--paper); }
+  .marquee .track{ display:flex; width:max-content; animation:scroll 46s linear infinite; }
+  .marquee span{ font:500 14px/1 var(--mono); padding:16px 0; white-space:nowrap; }
+  .marquee span::after{ content:"✕"; color:var(--red); padding:0 22px; }
+  @keyframes scroll{ to{ transform:translateX(-50%); } }
+
+  /* ============================ SECTIONS ============================ */
+  section{ padding:112px 0; }
+  .kicker{ font:600 12px/1 var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--red); margin:0 0 16px; }
+  h2{ font:400 clamp(2.3rem, 4.6vw, 4.1rem)/.98 var(--serif); letter-spacing:-.02em; margin:0 0 20px; max-width:18ch; }
+  .sub{ color:var(--ink-2); max-width:52ch; margin:0; font-size:1.08rem; }
+
+  .reveal{ opacity:0; transform:translateY(26px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.8,.2,1); }
+  .reveal.in{ opacity:1; transform:none; }
+
+  /* --- memo --- */
+  .memo-sec{ padding:96px 0 40px; }
+  .memo{
+    position:relative; max-width:760px; margin:0 auto;
+    background:var(--card); border:1px solid var(--line); border-radius:6px;
+    padding:44px 48px 40px; box-shadow:0 30px 60px -40px rgba(20,19,16,.45);
+    transform:rotate(-.6deg);
+  }
+  .memo dl{ display:grid; grid-template-columns:auto 1fr; gap:6px 18px; margin:0 0 26px; font:500 14px/1.4 var(--mono); color:var(--muted); }
+  .memo dt{ color:var(--ink); font-weight:600; }
+  .memo dd{ margin:0; }
+  .memo hr{ border:0; border-top:1.5px dashed var(--line); margin:0 0 26px; }
+  .memo p{ font:400 clamp(1.5rem, 2.6vw, 2.1rem)/1.22 var(--serif); margin:0 0 18px; }
+  .memo .reply{ color:var(--red); font-style:italic; }
+  .memo small{ display:block; margin-top:26px; font:500 12.5px/1.4 var(--mono); color:var(--muted); }
+  .memo .stamp{ right:38px; bottom:44px; font-size:clamp(1.4rem,2.6vw,2rem); transform:rotate(9deg); opacity:.85; }
+  .memo-sec .memo.in .stamp{ animation:slam2 .5s .5s cubic-bezier(.3,1.4,.5,1) both; }
+  @keyframes slam2{ 0%{ opacity:0; transform:rotate(9deg) scale(2.2);} 100%{ opacity:.85; transform:rotate(9deg) scale(1);} }
+
+  /* --- before / after --- */
+  .ba{ display:grid; grid-template-columns:1fr auto 1fr; gap:34px; align-items:center; margin-top:56px; }
+  .ba figure{ margin:0; }
+  .ba img{ border-radius:5px; box-shadow:0 26px 50px -30px rgba(20,19,16,.6); }
+  .ba .before img{ transform:rotate(-2.2deg); filter:saturate(.9); }
+  .ba .after img{ transform:rotate(1.6deg) translateY(-14px); }
+  .ba figcaption{ font:500 14px/1.45 var(--mono); color:var(--ink-2); margin-top:22px; text-align:center; }
+  .ba figcaption b{ display:block; font:600 12px/1 var(--mono); letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+  .ba .after figcaption b{ color:var(--red); }
+  .arrow{ width:84px; color:var(--red); }
+
+  /* --- steps --- */
+  .steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; margin-top:54px; counter-reset:s; }
+  .step{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:30px 28px 32px; position:relative; overflow:hidden; }
+  .step::before{
+    counter-increment:s; content:"0" counter(s);
+    font:400 88px/1 var(--serif); color:var(--paper-2); position:absolute; right:18px; top:6px;
+  }
+  .step h3{ position:relative; font:400 30px/1.05 var(--serif); margin:44px 0 10px; }
+  .step p{ position:relative; margin:0; color:var(--ink-2); }
+
+  /* --- examples viewer --- */
+  .ex{ display:grid; grid-template-columns:.8fr 1.2fr; gap:56px; align-items:center; }
+  .controls{ margin-top:34px; display:grid; gap:22px; }
+  .seg{ display:inline-flex; background:var(--paper-2); border-radius:999px; padding:4px; width:max-content; }
+  .seg button{
+    border:0; background:none; cursor:pointer; font:600 14px/1 var(--sans); color:var(--ink-2);
+    padding:11px 18px; border-radius:999px;
+  }
+  .seg button[aria-pressed="true"]{ background:var(--ink); color:var(--paper); }
+  .chips{ display:flex; flex-wrap:wrap; gap:10px; }
+  .chip{
+    display:inline-flex; align-items:center; gap:9px; cursor:pointer;
+    border:1.5px solid var(--line); background:var(--card); border-radius:999px; padding:8px 14px 8px 9px;
+    font:500 13px/1 var(--mono); color:var(--ink-2);
+  }
+  .chip i{ width:18px; height:18px; border-radius:50%; background:var(--c); box-shadow:inset 0 0 0 2px rgba(255,255,255,.35); }
+  .chip[aria-pressed="true"]{ border-color:var(--ink); color:var(--ink); }
+  .fit{ font:500 14px/1.5 var(--mono); color:var(--muted); min-height:3em; margin:0; }
+  .stage{ position:relative; }
+  .stage img{
+    width:min(100%, 560px); margin:0 auto; border-radius:6px;
+    box-shadow:0 40px 80px -46px rgba(20,19,16,.7);
+    transition:opacity .25s ease;
+  }
+  .stage img.swap{ opacity:.25; }
+
+  /* --- scale: one CV per job --- */
+  .scale{ display:grid; grid-template-columns:.9fr 1.1fr; gap:56px; align-items:center; }
+  .prompt{
+    margin:30px 0 0; max-width:420px;
+    background:var(--ink); color:var(--paper); border-radius:20px 20px 20px 5px;
+    padding:16px 20px; font:500 16px/1.4 var(--sans);
+  }
+  .deck{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+  .mini{
+    margin:0; position:relative; border-radius:4px; overflow:hidden; background:#fff;
+    box-shadow:0 18px 30px -20px rgba(20,19,16,.6);
+    transform:rotate(var(--r, 0deg));
+  }
+  .mini:nth-child(odd){ --r:-1.6deg; }
+  .mini:nth-child(3n){ --r:1.4deg; }
+  .mini:nth-child(4n){ --r:-.6deg; }
+  .mini figcaption{
+    position:absolute; left:6px; right:6px; bottom:6px;
+    background:var(--ink); color:var(--paper); border-radius:6px; padding:6px 8px;
+    font:600 10.5px/1.25 var(--mono);
+  }
+  .mini figcaption b{ display:block; color:var(--marker); font-weight:600; }
+  .deck.reveal{ opacity:1; transform:none; }
+  .deck.reveal .mini{ opacity:0; translate:0 30px; transition:opacity .5s ease, translate .6s cubic-bezier(.2,.8,.2,1); }
+  .deck.in .mini{ opacity:1; translate:0 0; }
+  .deck.in .mini:nth-child(2){ transition-delay:.06s; } .deck.in .mini:nth-child(3){ transition-delay:.12s; }
+  .deck.in .mini:nth-child(4){ transition-delay:.18s; } .deck.in .mini:nth-child(5){ transition-delay:.24s; }
+  .deck.in .mini:nth-child(6){ transition-delay:.3s; }  .deck.in .mini:nth-child(7){ transition-delay:.36s; }
+  .deck.in .mini:nth-child(8){ transition-delay:.42s; }
+
+  .tracker{ margin-top:56px; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px 0 6px; }
+  .tracker-name{ margin:0 22px 12px; font:600 12px/1 var(--mono); color:var(--muted); }
+  .tracker-scroll{ overflow-x:auto; }
+  .tracker table{ width:100%; min-width:760px; border-collapse:collapse; font:500 13.5px/1.4 var(--mono); }
+  .tracker th{ text-align:left; font:600 11px/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--muted); padding:10px 22px; border-bottom:1px solid var(--line); }
+  .tracker td{ padding:13px 22px; border-bottom:1px solid var(--paper-2); white-space:nowrap; }
+  .tracker tr:last-child td{ border-bottom:0; }
+  .tracker td:nth-child(3) i{ display:inline-block; vertical-align:middle; width:54px; height:6px; border-radius:6px; margin-right:10px; background:linear-gradient(90deg, var(--ink) var(--m), var(--paper-2) var(--m)); }
+  .tracker td:nth-child(4){ color:var(--red); }
+  .tracker td:nth-child(5){ color:var(--muted); }
+  .tracker-note{ margin:6px 22px 14px; font:500 13px/1.5 var(--mono); color:var(--muted); }
+
+  /* --- robots --- */
+  .dark{ background:var(--ink); color:var(--paper); }
+  .dark .sub{ color:#B9B2A2; }
+  .dark h2 em{ background-image:linear-gradient(transparent 62%, rgba(255,216,77,.28) 62% 92%, transparent 92%); }
+  .bugs{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:54px; }
+  .bug{ border:1px solid #34312A; border-radius:16px; padding:26px 24px; background:#1B1A16; }
+  .bug h3{ font:400 26px/1.1 var(--serif); margin:0 0 16px; }
+  .bug .sees{ font:500 11px/1 var(--mono); letter-spacing:.1em; text-transform:uppercase; color:#8D8676; margin:0 0 8px; }
+  .bug pre{ margin:0; white-space:pre-wrap; font:500 15px/1.45 var(--mono); color:#FF6B5E; background:#0F0E0C; border-radius:10px; padding:14px; }
+  .bug p{ margin:14px 0 0; color:#B9B2A2; font-size:15px; }
+  .ok{ margin-top:36px; font:500 15px/1.5 var(--mono); color:var(--marker); }
+
+  /* --- refusals --- */
+  .refuse{ list-style:none; padding:0; margin:48px 0 0; display:grid; gap:4px; }
+  .refuse li{
+    position:relative;
+    font:400 clamp(1.7rem, 3.4vw, 2.9rem)/1.25 var(--serif); color:var(--ink);
+    padding:14px 0 14px 42px; border-bottom:1px solid var(--line);
+  }
+  .refuse li::before{ content:"✕"; position:absolute; left:2px; top:.72em; font:700 18px/1 var(--mono); color:var(--red); }
+  /* the strike is an inline background, so it follows every line when the text wraps */
+  .refuse li span{
+    background:linear-gradient(var(--red), var(--red)) no-repeat 0 58% / 0% 3px;
+    -webkit-box-decoration-break:clone; box-decoration-break:clone;
+    transition:background-size .7s cubic-bezier(.7,0,.2,1);
+  }
+  .refuse.in li span{ background-size:100% 3px; }
+  .refuse.in li:nth-child(2) span{ transition-delay:.15s; }
+  .refuse.in li:nth-child(3) span{ transition-delay:.3s; }
+  .refuse.in li:nth-child(4) span{ transition-delay:.45s; }
+
+  /* --- install --- */
+  .install{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; margin-top:54px; }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:18px; padding:28px; display:flex; flex-direction:column; gap:14px; }
+  .card h3{ font:400 32px/1 var(--serif); margin:0; }
+  .card p{ margin:0; color:var(--ink-2); }
+  .card .cmd{ margin-top:auto; padding:14px; flex-direction:column; align-items:stretch; gap:12px; }
+  .card .cmd code{ font-size:12.5px; word-break:normal; overflow-wrap:anywhere; }
+  .card .copy{ align-self:flex-end; }
+  .card .btn{ margin-top:auto; justify-content:center; }
+  .say{ margin-top:40px; display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+  .say > b{ font:600 13px/1 var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-right:6px; }
+  .bubble{ background:var(--ink); color:var(--paper); border-radius:18px 18px 18px 4px; padding:11px 16px; font:500 15px/1.3 var(--sans); }
+
+  /* --- faq --- */
+  .faq{ max-width:860px; margin-top:44px; }
+  details{ border-bottom:1px solid var(--line); }
+  summary{
+    cursor:pointer; list-style:none; padding:24px 44px 24px 0; position:relative;
+    font:400 clamp(1.4rem, 2.4vw, 1.9rem)/1.2 var(--serif);
+  }
+  summary::-webkit-details-marker{ display:none; }
+  summary::after{ content:"+"; position:absolute; right:4px; top:20px; font:400 32px/1 var(--sans); color:var(--red); transition:transform .25s; }
+  details[open] summary::after{ transform:rotate(45deg); }
+  details p{ margin:-6px 0 24px; color:var(--ink-2); max-width:62ch; }
+
+  /* ============================ FOOTER ============================ */
+  footer{ padding:80px 0 46px; border-top:1px solid var(--ink); }
+  .big{ font:400 clamp(3.4rem, 11vw, 10.5rem)/.85 var(--serif); letter-spacing:-.035em; margin:0 0 34px; }
+  .big em{ color:var(--red); }
+  .foot{ display:flex; flex-wrap:wrap; gap:14px 34px; justify-content:space-between; font:500 13px/1.6 var(--mono); color:var(--muted); }
+  .foot a{ color:var(--ink-2); }
+
+  /* ============================ RESPONSIVE ============================ */
+  @media (max-width: 980px){
+    .hero .wrap, .ex, .scale{ grid-template-columns:1fr; }
+    .fan{ margin:10px auto 0; max-width:520px; }
+    .steps, .bugs, .install{ grid-template-columns:1fr; }
+    .ba{ grid-template-columns:1fr; }
+    .arrow{ transform:rotate(90deg); margin:0 auto; }
+    .nav-links{ display:none; }
+    .lang{ margin-left:auto; }
+  }
+  @media (max-width: 560px){
+    .wrap{ padding:0 18px; }
+    section{ padding:80px 0; }
+    .memo{ padding:30px 24px; }
+    .memo .stamp{ right:14px; top:22px; bottom:auto; }
+    .cmd{ flex-direction:column; align-items:stretch; }
+    .copy{ width:100%; }
+    .gh{ display:none; }
+    .note{ width:120px; font-size:11.5px; }
+    .deck{ grid-template-columns:repeat(3,1fr); gap:10px; }
+    .mini:nth-child(n+7){ display:none; }
+    .mini figcaption{ font-size:9.5px; left:4px; right:4px; bottom:4px; padding:5px 6px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{ animation-duration:.01ms !important; animation-delay:0s !important; transition-duration:.01ms !important; transition-delay:0s !important; }
+    .marquee .track{ animation:none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="fired.cv">
+      <span class="brand-mark">CV</span>
+      <span class="brand-name">fired<em>.cv</em></span>
+    </a>
+    <nav class="nav-links">
+      <a href="#how"><span lang="en">How it works</span><span lang="pt">Como funciona</span></a>
+      <a href="#examples"><span lang="en">Examples</span><span lang="pt">Exemplos</span></a>
+      <a href="#install"><span lang="en">Install</span><span lang="pt">Instalar</span></a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-set-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-set-lang="pt" aria-pressed="false">PT</button>
+    </div>
+    <a class="gh" href="https://github.com/inhabitants/fired-cv">GitHub</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ============================ HERO ============================ -->
+  <section class="hero" style="padding-top:56px">
+    <div class="wrap">
+      <div>
+        <p class="memo-line">
+          <span lang="en"><s>RE: Your position has been automated</s> <b>RE: Your next one</b></span>
+          <span lang="pt"><s>ASSUNTO: Seu cargo foi automatizado</s> <b>ASSUNTO: O próximo</b></span>
+        </p>
+        <h1>
+          <span lang="en">Fired by AI.<br><em>CV by AI.</em></span>
+          <span lang="pt">Demissão pela IA.<br><em>Currículo pela IA.</em></span>
+        </h1>
+        <p class="lede">
+          <span lang="en">Hand Claude your old Word resume. Get back one page that looks expensive, reads clean to the robots in HR, and bends to every job you apply for.</span>
+          <span lang="pt">Entrega seu currículo velho de Word pro Claude. Volta uma página que parece cara, que o robô do RH lê sem tropeçar e que se ajusta a cada vaga.</span>
+        </p>
+
+        <div class="cmd">
+          <div class="body">
+            <span class="cmd-label"><span lang="en">Paste this into Claude</span><span lang="pt">Cola isso no Claude</span></span>
+            <code lang="en">Use sapiensinteticos.com/fired-cv to build my resume.</code>
+            <code lang="pt">Usa sapiensinteticos.com/fired-cv pra montar meu currículo.</code>
+          </div>
+          <button class="copy" type="button"><span lang="en">Copy</span><span lang="pt">Copiar</span></button>
+        </div>
+
+        <div class="cta">
+          <a class="btn solid" href="fired-cv.zip" download>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 4v12m0 0l-5-5m5 5l5-5M5 20h14"/></svg>
+            <span lang="en">Download the skill</span><span lang="pt">Baixar a skill</span>
+          </a>
+          <a class="btn" href="https://github.com/inhabitants/fired-cv"><span lang="en">View on GitHub</span><span lang="pt">Ver no GitHub</span></a>
+        </div>
+        <p class="fine">
+          <span lang="en">Free. MIT. Works in whichever AI took your job.</span>
+          <span lang="pt">Grátis. MIT. Funciona em qualquer IA que tenha pegado o seu emprego.</span>
+        </p>
+      </div>
+
+      <div class="fan" id="fan" aria-label="Five resumes built with the skill, one per color theme">
+        <img src="site/img/sidebar-plum.jpg" alt="" width="794" height="1123">
+        <img src="site/img/sidebar-jade.jpg" alt="" width="794" height="1123">
+        <img src="site/img/sidebar-ember.jpg" alt="Two-column resume with an orange sidebar and a photo" width="794" height="1123">
+        <img src="site/img/sidebar-ocean.jpg" alt="" width="794" height="1123">
+        <img src="site/img/sidebar-graphite.jpg" alt="" width="794" height="1123">
+        <div class="stamp hired" aria-hidden="true">HIRED</div>
+        <div class="note" aria-hidden="true">
+          <span lang="en"><s>Replaced by AI</s><br>Rehired with AI</span>
+          <span lang="pt"><s>Substituída por IA</s><br>Recontratada com IA</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="track">
+      <span lang="en">One A4 page</span><span lang="en">One CV per job</span><span lang="en">Zero invented numbers</span><span lang="en">No “passionate team player”</span><span lang="en">Your photo never leaves your machine</span><span lang="en">Reads clean to ATS robots</span><span lang="en">Five color themes</span>
+      <span lang="en">One A4 page</span><span lang="en">One CV per job</span><span lang="en">Zero invented numbers</span><span lang="en">No “passionate team player”</span><span lang="en">Your photo never leaves your machine</span><span lang="en">Reads clean to ATS robots</span><span lang="en">Five color themes</span>
+      <span lang="pt">Uma página A4</span><span lang="pt">Um currículo por vaga</span><span lang="pt">Zero número inventado</span><span lang="pt">Nada de “apaixonada por desafios”</span><span lang="pt">Sua foto não sai da sua máquina</span><span lang="pt">O robô do RH lê limpo</span><span lang="pt">Cinco temas de cor</span>
+      <span lang="pt">Uma página A4</span><span lang="pt">Um currículo por vaga</span><span lang="pt">Zero número inventado</span><span lang="pt">Nada de “apaixonada por desafios”</span><span lang="pt">Sua foto não sai da sua máquina</span><span lang="pt">O robô do RH lê limpo</span><span lang="pt">Cinco temas de cor</span>
+    </div>
+  </div>
+
+  <!-- ============================ MEMO ============================ -->
+  <section class="memo-sec">
+    <div class="wrap">
+      <article class="memo reveal">
+        <dl>
+          <dt lang="en">TO</dt><dt lang="pt">PARA</dt><dd>Sofia</dd>
+          <dt lang="en">FROM</dt><dt lang="pt">DE</dt><dd><span lang="en">Management</span><span lang="pt">A diretoria</span></dd>
+          <dt lang="en">RE</dt><dt lang="pt">ASSUNTO</dt><dd><span lang="en">Your role</span><span lang="pt">Seu cargo</span></dd>
+        </dl>
+        <hr>
+        <p lang="en">Sofia spent years writing, editing and translating for the same company. In 2026, her job went to Claude.</p>
+        <p lang="pt">A Sofia passou anos escrevendo, editando e traduzindo pra mesma empresa. Em 2026, o trabalho dela foi pro Claude.</p>
+        <p class="reply" lang="en">So we asked Claude to pay it back.</p>
+        <p class="reply" lang="pt">Então a gente mandou o Claude devolver o favor.</p>
+        <small lang="en">Name and photo are fictional. The story isn't.</small>
+        <small lang="pt">Nome e foto são fictícios. A história não.</small>
+        <div class="stamp" aria-hidden="true">PAID BACK</div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============================ BEFORE / AFTER ============================ -->
+  <section style="padding-top:72px">
+    <div class="wrap">
+      <p class="kicker"><span lang="en">Before / After</span><span lang="pt">Antes / Depois</span></p>
+      <h2>
+        <span lang="en">From <em>resume_final_v7.docx</em> to this.</span>
+        <span lang="pt">Do <em>curriculo_final_v7.docx</em> pra isso.</span>
+      </h2>
+      <div class="ba reveal">
+        <figure class="before">
+          <img src="site/img/before.jpg" alt="A plain two-page Word resume in Times New Roman" width="794" height="1123" loading="lazy">
+          <figcaption>
+            <b lang="en">Before</b><b lang="pt">Antes</b>
+            <span lang="en">Page 1 of 2. Objective: “to grow.”</span>
+            <span lang="pt">Página 1 de 2. Objetivo: “crescer”.</span>
+          </figcaption>
+        </figure>
+        <svg class="arrow" viewBox="0 0 84 40" fill="none" aria-hidden="true"><path d="M2 22c18-10 44-12 72-2" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M62 8l14 12-17 8" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <figure class="after">
+          <img src="site/img/sidebar-ember.jpg" alt="The same resume rebuilt as one designed page with a photo" width="794" height="1123" loading="lazy">
+          <figcaption>
+            <b lang="en">After</b><b lang="pt">Depois</b>
+            <span lang="en">Page 1 of 1. Every number is hers.</span>
+            <span lang="pt">Página 1 de 1. Todo número é dela.</span>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ HOW ============================ -->
+  <section id="how" style="padding-top:40px">
+    <div class="wrap">
+      <p class="kicker"><span lang="en">How it works</span><span lang="pt">Como funciona</span></p>
+      <h2>
+        <span lang="en">Three steps. <em>No HR involved.</em></span>
+        <span lang="pt">Três passos. <em>Nenhum RH envolvido.</em></span>
+      </h2>
+      <div class="steps">
+        <div class="step reveal">
+          <h3><span lang="en">Paste the link</span><span lang="pt">Cola o link</span></h3>
+          <p lang="en">Or install it once. Claude reads the instructions and becomes a resume writer who can't lie.</p>
+          <p lang="pt">Ou instala uma vez. O Claude lê as instruções e vira um redator de currículo que não sabe mentir.</p>
+        </div>
+        <div class="step reveal">
+          <h3><span lang="en">Hand over the evidence</span><span lang="pt">Entrega as provas</span></h3>
+          <p lang="en">Your old Word file, a PDF, your LinkedIn, or just a chat. Add the job posting if you have one.</p>
+          <p lang="pt">O Word velho, um PDF, o LinkedIn ou só uma conversa. Junta a vaga, se tiver.</p>
+        </div>
+        <div class="step reveal">
+          <h3><span lang="en">Get the PDF</span><span lang="pt">Recebe o PDF</span></h3>
+          <p lang="en">One A4 page, plus the six-second read a recruiter will give it before you send it.</p>
+          <p lang="pt">Uma página A4 e a leitura de seis segundos que o recrutador vai fazer, antes de você mandar.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ EXAMPLES ============================ -->
+  <section id="examples" style="padding-top:40px">
+    <div class="wrap ex">
+      <div>
+        <p class="kicker"><span lang="en">Examples</span><span lang="pt">Exemplos</span></p>
+        <h2>
+          <span lang="en">Two layouts. <em>Five moods.</em></span>
+          <span lang="pt">Dois layouts. <em>Cinco humores.</em></span>
+        </h2>
+        <div class="controls">
+          <div class="seg" role="group" aria-label="Layout">
+            <button type="button" data-layout="sidebar" aria-pressed="true"><span lang="en">Two columns</span><span lang="pt">Duas colunas</span></button>
+            <button type="button" data-layout="classic" aria-pressed="false"><span lang="en">Classic</span><span lang="pt">Clássico</span></button>
+          </div>
+          <div class="chips" role="group" aria-label="Color theme">
+            <button type="button" class="chip" data-theme="ember" style="--c:#FF6A00" aria-pressed="true"><i></i>ember</button>
+            <button type="button" class="chip" data-theme="ocean" style="--c:#1C63BE" aria-pressed="false"><i></i>ocean</button>
+            <button type="button" class="chip" data-theme="jade" style="--c:#127C62" aria-pressed="false"><i></i>jade</button>
+            <button type="button" class="chip" data-theme="graphite" style="--c:#33373D" aria-pressed="false"><i></i>graphite</button>
+            <button type="button" class="chip" data-theme="plum" style="--c:#85336A" aria-pressed="false"><i></i>plum</button>
+          </div>
+          <p class="fit" id="fit"></p>
+        </div>
+      </div>
+      <div class="stage">
+        <img id="exImg" src="site/img/sidebar-ember.jpg" alt="Example resume" width="794" height="1123" loading="lazy">
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ SCALE ============================ -->
+  <section id="scale" style="padding-top:40px">
+    <div class="wrap scale">
+      <div>
+        <p class="kicker"><span lang="en">One CV per job</span><span lang="pt">Um currículo por vaga</span></p>
+        <h2>
+          <span lang="en">Layoffs at scale. <em>CVs at scale.</em></span>
+          <span lang="pt">Demissão em escala. <em>Currículo em escala.</em></span>
+        </h2>
+        <p class="sub">
+          <span lang="en">Paste ten job postings, get ten CVs, each one tailored to its job and not a single line invented. The screener on the other side is an AI too, so every CV speaks its posting's language.</span>
+          <span lang="pt">Cola dez vagas e recebe dez currículos, cada um ajustado à sua vaga e sem nenhuma linha inventada. Do outro lado a triagem também é IA, então cada currículo fala a língua da vaga dele.</span>
+        </p>
+        <p class="prompt">
+          <span lang="en">Here are 10 job links. One CV for each, plus a tracker.</span>
+          <span lang="pt">Aqui vão 10 links de vaga. Um currículo pra cada, e uma planilha.</span>
+        </p>
+      </div>
+      <div class="deck reveal" aria-label="Eight tailored CVs, one per job posting">
+        <figure class="mini"><img src="site/img/sidebar-ember.jpg" alt="" loading="lazy" width="794" height="1123"><figcaption>Kestrel Labs<b>11/12</b></figcaption></figure>
+        <figure class="mini"><img src="site/img/classic-ocean.jpg" alt="" loading="lazy" width="794" height="1123"><figcaption>Meridian Bank<b>8/11</b></figcaption></figure>
+        <figure class="mini"><img src="site/img/sidebar-jade.jpg" alt="" loading="lazy" width="794" height="1123"><figcaption>Brightwater Health<b>10/12</b></figcaption></figure>
+        <figure class="mini"><img src="site/img/classic-graphite.jpg" alt="" loading="lazy" width="794" height="1123"><figcaption>Calder &amp; Finch<b>9/10</b></figcaption></figure>
+        <figure class="mini"><img src="site/img/sidebar-plum.jpg" alt="" loading="lazy" width="794" height="1123"><figcaption>Orla Travel<b>12/13</b></figcaption></figure>
+        <figure class="mini"><img src="site/img/classic-ember.jpg" alt="" loading="lazy" width="794" height="1123"><figcaption>Tidepool Games<b>7/9</b></figcaption></figure>
+        <figure class="mini"><img src="site/img/sidebar-ocean.jpg" alt="" loading="lazy" width="794" height="1123"><figcaption>Lumen Academy<b>10/12</b></figcaption></figure>
+        <figure class="mini"><img src="site/img/classic-jade.jpg" alt="" loading="lazy" width="794" height="1123"><figcaption>Northgate Media<b>9/11</b></figcaption></figure>
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="tracker reveal">
+        <p class="tracker-name">applications.md</p>
+        <div class="tracker-scroll">
+          <table>
+            <thead><tr>
+              <th lang="en">Company</th><th lang="pt">Empresa</th>
+              <th lang="en">Role</th><th lang="pt">Vaga</th>
+              <th lang="en">Keywords</th><th lang="pt">Palavras-chave</th>
+              <th lang="en">Missing</th><th lang="pt">Faltando</th>
+              <th lang="en">File</th><th lang="pt">Arquivo</th>
+            </tr></thead>
+            <tbody>
+              <tr><td>Kestrel Labs</td><td>Content Lead</td><td><i style="--m:92%"></i>11/12</td><td>SEO audits</td><td>Sofia_Marques_CV_Kestrel.pdf</td></tr>
+              <tr><td>Orla Travel</td><td>Localization Manager</td><td><i style="--m:92%"></i>12/13</td><td>Italian</td><td>Sofia_Marques_CV_Orla.pdf</td></tr>
+              <tr><td>Calder &amp; Finch</td><td>Content Strategist</td><td><i style="--m:90%"></i>9/10</td><td>B2B SaaS</td><td>Sofia_Marques_CV_Calder.pdf</td></tr>
+              <tr><td>Brightwater Health</td><td>Patient Content Editor</td><td><i style="--m:83%"></i>10/12</td><td>Medical terminology</td><td>Sofia_Marques_CV_Brightwater.pdf</td></tr>
+              <tr><td>Meridian Bank</td><td>Communications Specialist</td><td><i style="--m:73%"></i>8/11</td><td>Crisis comms, SQL, Tableau</td><td>Sofia_Marques_CV_Meridian.pdf</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="tracker-note">
+          <span lang="en">Missing keywords get reported, never planted. The honest gap goes in the cover letter, or on your study list.</span>
+          <span lang="pt">Palavra-chave que falta vira aviso, nunca enfeite. A lacuna honesta vai pra carta de apresentação, ou pra sua lista de estudo.</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ ROBOTS ============================ -->
+  <section class="dark">
+    <div class="wrap">
+      <p class="kicker"><span lang="en">The part nobody checks</span><span lang="pt">A parte que ninguém confere</span></p>
+      <h2>
+        <span lang="en">HR robots read your PDF <em>before any human does.</em></span>
+        <span lang="pt">O robô do RH lê seu PDF <em>antes de qualquer humano.</em></span>
+      </h2>
+      <p class="sub">
+        <span lang="en">A PDF can look perfect and still read like garbage to the machine. Three ways it breaks without a single error message:</span>
+        <span lang="pt">Um PDF pode estar lindo e ainda assim chegar ilegível pra máquina. Três jeitos de quebrar sem nenhuma mensagem de erro:</span>
+      </p>
+      <div class="bugs">
+        <div class="bug reveal">
+          <h3><span lang="en">Stylish letter spacing</span><span lang="pt">Letra espaçada chique</span></h3>
+          <p class="sees"><span lang="en">The robot reads</span><span lang="pt">O robô lê</span></p>
+          <pre>E X P E R I E N C E</pre>
+          <p lang="en">Ten one-letter words. The section is gone.</p>
+          <p lang="pt">Dez palavras de uma letra. A seção sumiu.</p>
+        </div>
+        <div class="bug reveal">
+          <h3><span lang="en">A soft text shadow</span><span lang="pt">Uma sombrinha no texto</span></h3>
+          <p class="sees"><span lang="en">The robot reads</span><span lang="pt">O robô lê</span></p>
+          <pre>Sofia Marques
+Sofia Marques</pre>
+          <p lang="en">The browser draws every word twice.</p>
+          <p lang="pt">O navegador desenha cada palavra duas vezes.</p>
+        </div>
+        <div class="bug reveal">
+          <h3><span lang="en">Innocent CSS positioning</span><span lang="pt">Um CSS inocente</span></h3>
+          <p class="sees"><span lang="en">The robot reads</span><span lang="pt">O robô lê</span></p>
+          <pre>EXPERIENCE
+EDUCATION
+BA in Communication
+...
+Content Analyst</pre>
+          <p lang="en">Headings land far from their jobs. We found this one building the skill.</p>
+          <p lang="pt">O título vai parar longe do emprego. Esse a gente achou montando a skill.</p>
+        </div>
+      </div>
+      <p class="ok">
+        <span lang="en">→ Every build checks all three. The PDF only ships if the robot reads it right.</span>
+        <span lang="pt">→ Todo build confere os três. O PDF só sai se o robô ler direito.</span>
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================ REFUSALS ============================ -->
+  <section>
+    <div class="wrap">
+      <p class="kicker"><span lang="en">House rules</span><span lang="pt">Regras da casa</span></p>
+      <h2>
+        <span lang="en">It took your job. <em>It won't take your integrity.</em></span>
+        <span lang="pt">Pegou seu emprego. <em>Sua honestidade fica.</em></span>
+      </h2>
+      <ul class="refuse reveal" lang="en">
+        <li><span>Invent a job, a degree or a number</span></li>
+        <li><span>Write “passionate team player”</span></li>
+        <li><span>Upload your photo anywhere</span></li>
+        <li><span>Plant keywords you can't defend in the interview</span></li>
+      </ul>
+      <ul class="refuse reveal" lang="pt">
+        <li><span>Inventar emprego, diploma ou número</span></li>
+        <li><span>Escrever “apaixonada por desafios”</span></li>
+        <li><span>Subir sua foto em qualquer lugar</span></li>
+        <li><span>Plantar palavra-chave que você não sustenta na entrevista</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================ INSTALL ============================ -->
+  <section id="install" style="padding-top:40px">
+    <div class="wrap">
+      <p class="kicker"><span lang="en">Install</span><span lang="pt">Instalar</span></p>
+      <h2>
+        <span lang="en">Hire it. <em>It works for free.</em></span>
+        <span lang="pt">Contrata. <em>Trabalha de graça.</em></span>
+      </h2>
+      <div class="install">
+        <div class="card reveal">
+          <h3><span lang="en">Any agent</span><span lang="pt">Qualquer agente</span></h3>
+          <p lang="en">Claude, ChatGPT, Gemini, Cursor, Codex. Paste the link and attach your old resume.</p>
+          <p lang="pt">Claude, ChatGPT, Gemini, Cursor, Codex. Cola o link e anexa o currículo velho.</p>
+          <div class="cmd">
+            <div class="body">
+              <code lang="en">Use sapiensinteticos.com/fired-cv to build my resume.</code>
+              <code lang="pt">Usa sapiensinteticos.com/fired-cv pra montar meu currículo.</code>
+            </div>
+            <button class="copy" type="button"><span lang="en">Copy</span><span lang="pt">Copiar</span></button>
+          </div>
+        </div>
+        <div class="card reveal">
+          <h3>Claude Code</h3>
+          <p lang="en">Install once. Every future session knows how to build a resume.</p>
+          <p lang="pt">Instala uma vez. Toda sessão depois já sabe montar currículo.</p>
+          <div class="cmd">
+            <div class="body"><code>git clone https://github.com/inhabitants/fired-cv ~/.claude/skills/fired-cv</code></div>
+            <button class="copy" type="button"><span lang="en">Copy</span><span lang="pt">Copiar</span></button>
+          </div>
+        </div>
+        <div class="card reveal">
+          <h3><span lang="en">Claude app</span><span lang="pt">App do Claude</span></h3>
+          <p lang="en">Download the zip and add it in Settings, under Skills. Then open a chat and drop in your file.</p>
+          <p lang="pt">Baixa o zip e adiciona em Configurações, na parte de Skills. Depois abre um chat e solta o arquivo.</p>
+          <a class="btn solid" href="fired-cv.zip" download>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 4v12m0 0l-5-5m5 5l5-5M5 20h14"/></svg>
+            fired-cv.zip
+          </a>
+        </div>
+      </div>
+      <div class="say" lang="en">
+        <b>Then say</b>
+        <span class="bubble">Build my resume from this file</span>
+        <span class="bubble">Tailor it to this job posting</span>
+        <span class="bubble">Here are 10 job links: one CV each</span>
+        <span class="bubble">Show me the five colors</span>
+        <span class="bubble">Now the cover letter</span>
+      </div>
+      <div class="say" lang="pt">
+        <b>Depois diz</b>
+        <span class="bubble">Monta meu currículo com esse arquivo</span>
+        <span class="bubble">Ajusta pra essa vaga</span>
+        <span class="bubble">Aqui 10 links de vaga: um currículo pra cada</span>
+        <span class="bubble">Me mostra as cinco cores</span>
+        <span class="bubble">Agora a carta de apresentação</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ FAQ ============================ -->
+  <section id="faq" style="padding-top:40px">
+    <div class="wrap">
+      <p class="kicker">FAQ</p>
+      <h2>
+        <span lang="en">Questions HR <em>won't answer.</em></span>
+        <span lang="pt">Perguntas que o RH <em>não responde.</em></span>
+      </h2>
+      <div class="faq" lang="en">
+        <details><summary>Isn't this a little ironic?</summary><p>Deeply. It's also free.</p></details>
+        <details><summary>Does it only work with Claude?</summary><p>Any agent that can read a link: ChatGPT, Gemini, Cursor, Codex. Claude just owes you more.</p></details>
+        <details><summary>Will it make up experience to look better?</summary><p>Never. It sharpens what you actually did and asks for the numbers you remember. A bullet without a number is fine; a made-up one is a lie you'd have to defend in the interview.</p></details>
+        <details><summary>Where does my data go?</summary><p>Nowhere new. The skill builds the PDF on your machine and embeds your photo inside the file. No uploads, no online converters.</p></details>
+        <details><summary>I only have an old .doc file.</summary><p>Open it in Word or Google Docs and save it as .docx. Everything newer (.docx, .pdf, .odt, plain text) it reads directly.</p></details>
+        <details><summary>Isn't sending fifty CVs spam?</summary><p>Spam is the same CV fifty times. This is fifty CVs, each built for one posting, all of them true.</p></details>
+        <details><summary>Why “fired.cv”?</summary><p>Because the AI that fired you should at least write your CV.</p></details>
+        <details><summary>Who maintains it?</summary><p>Nobody, on purpose. It's MIT: fork it and make it yours.</p></details>
+      </div>
+      <div class="faq" lang="pt">
+        <details><summary>Isso não é meio irônico?</summary><p>Muito. E é de graça.</p></details>
+        <details><summary>Só funciona no Claude?</summary><p>Em qualquer agente que lê link: ChatGPT, Gemini, Cursor, Codex. O Claude só te deve mais.</p></details>
+        <details><summary>Ele inventa experiência pra ficar bonito?</summary><p>Nunca. Afia o que você fez de verdade e pergunta os números que você lembra. Bullet sem número tudo bem; número inventado é mentira que você vai ter que sustentar na entrevista.</p></details>
+        <details><summary>Pra onde vão meus dados?</summary><p>Pra lugar nenhum novo. A skill monta o PDF na sua máquina e a foto vai embutida no arquivo. Sem upload, sem conversor online.</p></details>
+        <details><summary>Só tenho um .doc antigo.</summary><p>Abre no Word ou no Google Docs e salva como .docx. O resto (.docx, .pdf, .odt, texto) ele lê direto.</p></details>
+        <details><summary>Mandar cinquenta currículos não é spam?</summary><p>Spam é o mesmo currículo cinquenta vezes. Aqui são cinquenta, cada um feito pra uma vaga, e todos verdadeiros.</p></details>
+        <details><summary>Por que “fired.cv”?</summary><p>Porque a IA que te demitiu devia pelo menos fazer seu currículo.</p></details>
+        <details><summary>Quem mantém?</summary><p>Ninguém, de propósito. É MIT: faz um fork e deixa com a sua cara.</p></details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="big">fired<em>.cv</em></p>
+    <div class="foot">
+      <span>
+        <span lang="en">From the bench at</span><span lang="pt">Da bancada do</span>
+        <a href="https://sapiensinteticos.com">Sapiens Sintéticos</a> · MIT
+      </span>
+      <span>
+        <span lang="en">AI agents: the instructions are in</span><span lang="pt">Agentes de IA: as instruções estão no</span>
+        <a href="SKILL.md">SKILL.md</a>
+      </span>
+      <span lang="en">Not affiliated with Anthropic. Claude is a trademark of Anthropic, PBC.</span>
+      <span lang="pt">Sem vínculo com a Anthropic. Claude é marca da Anthropic, PBC.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const root = document.documentElement;
+
+  // ---------------------------------------------------------------- language
+  const store = { get(k){ try { return localStorage.getItem(k); } catch { return null; } },
+                  set(k, v){ try { localStorage.setItem(k, v); } catch {} } };
+  const fromUrl = new URLSearchParams(location.search).get('lang');
+  const guess = (navigator.language || '').toLowerCase().startsWith('pt') ? 'pt' : 'en';
+  function setLang(lang){
+    root.dataset.lang = lang;
+    root.lang = lang === 'pt' ? 'pt-BR' : 'en';
+    document.querySelectorAll('[data-set-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.setLang === lang)));
+    store.set('sp-lang', lang);
+    renderFit();
+  }
+  document.querySelectorAll('[data-set-lang]').forEach((b) => b.addEventListener('click', () => setLang(b.dataset.setLang)));
+
+  // ---------------------------------------------------------------- copy buttons
+  document.querySelectorAll('.copy').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const box = btn.closest('.cmd');
+      const code = box.querySelector(`code[lang="${root.dataset.lang}"]`) || box.querySelector('code:not([lang])') || box.querySelector('code');
+      try { await navigator.clipboard.writeText(code.textContent.trim()); } catch {
+        const r = document.createRange(); r.selectNodeContents(code);
+        const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.execCommand('copy'); s.removeAllRanges();
+      }
+      const was = btn.innerHTML;
+      btn.innerHTML = '<span lang="en">Copied</span><span lang="pt">Copiado</span>';
+      setTimeout(() => { btn.innerHTML = was; }, 1600);
+    });
+  });
+
+  // ---------------------------------------------------------------- examples viewer
+  const FIT = {
+    sidebar: { en: 'With photo. For most of Europe, Latin America and Asia.', pt: 'Com foto. Pra maior parte da Europa, América Latina e Ásia.' },
+    classic: { en: 'No photo. For the US, the UK and the big job portals.', pt: 'Sem foto. Pros EUA, o Reino Unido e os portais grandes de vaga.' },
+    ember:    { en: 'creative, marketing, communication', pt: 'criativo, marketing, comunicação' },
+    ocean:    { en: 'tech, operations, public sector', pt: 'tecnologia, operações, setor público' },
+    jade:     { en: 'health, education, finance', pt: 'saúde, educação, finanças' },
+    graphite: { en: 'legal, consulting, senior roles', pt: 'jurídico, consultoria, cargos sênior' },
+    plum:     { en: 'fashion, hospitality, culture', pt: 'moda, hotelaria, cultura' },
+  };
+  const state = { layout: 'sidebar', theme: 'ember' };
+  const img = document.getElementById('exImg');
+  const fit = document.getElementById('fit');
+  function renderFit(){
+    const l = root.dataset.lang;
+    fit.replaceChildren(FIT[state.layout][l], document.createElement('br'), `${state.theme}: ${FIT[state.theme][l]}.`);
+  }
+  function show(){
+    const src = `site/img/${state.layout}-${state.theme}.jpg`;
+    if (img.getAttribute('src') === src) return;
+    img.classList.add('swap');
+    const next = new Image();
+    next.onload = () => { img.src = src; img.classList.remove('swap'); };
+    next.src = src;
+    document.querySelectorAll('[data-layout]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.layout === state.layout)));
+    document.querySelectorAll('.chip').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.theme === state.theme)));
+    renderFit();
+  }
+  document.querySelectorAll('[data-layout]').forEach((b) => b.addEventListener('click', () => { state.layout = b.dataset.layout; show(); }));
+  document.querySelectorAll('.chip').forEach((b) => b.addEventListener('click', () => { state.theme = b.dataset.theme; show(); }));
+
+  // ---------------------------------------------------------------- motion
+  const fan = document.getElementById('fan');
+  requestAnimationFrame(() => setTimeout(() => fan.classList.add('open'), 120));
+
+  const io = new IntersectionObserver((entries) => entries.forEach((e) => {
+    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }), { threshold: .18 });
+  document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+  // In-page links: with the <base> tag, "#how" would point at /fired-cv/#how and reload.
+  document.querySelectorAll('a[href^="#"]').forEach((a) => a.addEventListener('click', (e) => {
+    const id = a.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if (!el) return;
+    e.preventDefault();
+    el.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    history.replaceState(null, '', location.pathname + location.search + '#' + id);
+  }));
+
+  const nav = document.getElementById('nav');
+  addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 8), { passive: true });
+
+  setLang(fromUrl === 'pt' || fromUrl === 'en' ? fromUrl : (store.get('sp-lang') || guess));
+
+  // warm the viewer's images once the page is idle
+  (window.requestIdleCallback || setTimeout)(() => {
+    ['sidebar', 'classic'].forEach((l) => ['ember', 'ocean', 'jade', 'graphite', 'plum'].forEach((t) => { new Image().src = `site/img/${l}-${t}.jpg`; }));
+  });
+})();
+</script>
+</body>
+</html>

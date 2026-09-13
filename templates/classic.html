@@ -1,0 +1,290 @@
+<!doctype html>
+<!--
+  fired.cv / templates/classic.html
+  Single-column resume, one A4 page. No photo, no sidebar, reading order equals
+  visual order. The safest choice for applicant tracking systems (Workday,
+  Greenhouse, Lever, Taleo) and for markets where a photo is a red flag
+  (US, UK, Canada, Ireland, Australia).
+
+  HOW TO FILL
+  - Replace the example person (Sofia Marques, fictional) with the real content.
+  - Repeat or delete whole blocks: <article class="job">, <li>, <div class="row">.
+  - Color: set <html data-theme="..."> to one of the themes below (ember, ocean,
+    jade, graphite, plum). One color, used sparingly. build.mjs --theme previews
+    one, --themes renders every theme side by side.
+  - Set <html lang> and the section titles to the language of the content.
+
+  RULES THAT BREAK SILENTLY (no error, broken PDF)
+  - letter-spacing above ~0.1em of the font size splits words letter by letter in
+    the PDF text layer. Keep it small.
+  - text-shadow on text makes Chrome draw the glyphs twice. Never.
+  - Chrome writes the PDF text in paint order, not DOM order. A position:relative
+    on some text blocks and not their siblings detaches headings and bullets from
+    their content in the text layer. This template positions no text on purpose.
+-->
+<html lang="en" data-theme="ocean">
+<head>
+<meta charset="utf-8">
+<title>Sofia Marques - Resume</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600;700&display=block" rel="stylesheet">
+<style>
+  /* ============================ THEMES ============================
+     One accent per theme, the only color on the page. Dark enough to read as
+     text on white (the title line uses it). Same names as sidebar.html. */
+  :root,
+  html[data-theme="ocean"]   { --accent: #1F5FBF; }   /* blue: default, fits everything */
+  html[data-theme="ember"]   { --accent: #C9510C; }   /* burnt orange: creative, communication */
+  html[data-theme="jade"]    { --accent: #0F7A60; }   /* green: health, education, finance */
+  html[data-theme="graphite"]{ --accent: #2E3238; }   /* near black: legal, consulting, senior */
+  html[data-theme="plum"]    { --accent: #7E2A5E; }   /* wine: fashion, hospitality, culture */
+
+  :root{
+    --ink:    #16181D;
+    --ink-2:  #3A3E47;
+    --ink-3:  #6A6F7A;
+    --rule:   #E3E6EB;
+  }
+
+  @page { size: A4; margin: 0; }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  html,body{
+    width:210mm;
+    background:#fff;
+    font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
+    color:var(--ink);
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .page{
+    width:210mm;
+    min-height:297mm;   /* min, not fixed: overflow must spill to page 2 so the build catches it */
+    padding:14mm 16mm 12mm;
+    position:relative;
+  }
+  /* a thin accent edge at the top, the only decoration */
+  .page::before{
+    content:"";
+    position:absolute; left:0; right:0; top:0;
+    height:2.2mm;
+    background:var(--accent);
+  }
+
+  /* ============================ HEADER ============================ */
+  header{ margin-bottom:5.5mm; }
+  .name{
+    font-family:'Archivo','Segoe UI',sans-serif;
+    font-weight:800;
+    font-size:9.4mm;
+    line-height:1.05;
+    letter-spacing:-.2mm;
+  }
+  .role{
+    font-size:3.9mm;
+    font-weight:600;
+    color:var(--accent);
+    margin-top:1.6mm;
+  }
+  .contact{
+    margin-top:2.6mm;
+    font-size:2.95mm;
+    color:var(--ink-2);
+    line-height:1.5;
+  }
+  .contact .sep{ color:var(--rule); padding:0 1.6mm; }
+  .highlight{
+    display:inline-block;
+    margin-top:2.4mm;
+    font-size:2.8mm;
+    font-weight:600;
+    color:var(--accent);
+    border:.3mm solid var(--accent);
+    border-radius:1.2mm;
+    padding:.8mm 2.2mm;
+  }
+
+  /* ============================ SECTIONS ============================ */
+  section{ margin-top:5mm; }
+  section:first-of-type{ margin-top:0; }
+  h2{
+    font-family:'Archivo','Segoe UI',sans-serif;
+    font-size:3.3mm;
+    font-weight:700;
+    letter-spacing:.3mm;
+    text-transform:uppercase;
+    color:var(--ink);
+    padding-bottom:1.5mm;
+    border-bottom:.35mm solid var(--rule);
+    margin-bottom:2.8mm;
+  }
+
+  .summary{
+    font-size:3.1mm;
+    line-height:1.45;
+    color:var(--ink-2);
+  }
+
+  /* --- experience --- */
+  .job{ margin-bottom:3.6mm; }
+  .job:last-child{ margin-bottom:0; }
+  .job-top{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:4mm;
+  }
+  .job-title{
+    font-family:'Archivo','Segoe UI',sans-serif;
+    font-size:3.5mm;
+    font-weight:700;
+    line-height:1.3;
+  }
+  .job-title em{
+    font-style:normal;
+    font-weight:600;
+    color:var(--ink-3);
+  }
+  .date{
+    flex:none;
+    font-size:2.85mm;
+    font-weight:600;
+    color:var(--ink-3);
+    white-space:nowrap;
+  }
+  .job ul{
+    list-style:none;
+    margin-top:1.4mm;
+  }
+  /* bullet is a background dot, not a positioned ::before: see the paint-order rule */
+  .job li{
+    padding-left:3.4mm;
+    font-size:3.0mm;
+    line-height:1.42;
+    color:var(--ink-2);
+    margin-bottom:.8mm;
+    background:radial-gradient(circle, var(--accent) 0 .57mm, transparent .63mm) no-repeat .4mm 1.55mm / 1.2mm 1.2mm;
+  }
+  .job li b{ font-weight:600; color:var(--ink); }
+
+  /* --- label : value rows (skills, languages, education) --- */
+  .row{
+    display:grid;
+    grid-template-columns:36mm 1fr;
+    gap:3mm;
+    font-size:3.0mm;
+    line-height:1.45;
+    margin-bottom:1.2mm;
+  }
+  .row .k{ font-weight:600; color:var(--ink); }
+  .row .v{ color:var(--ink-2); }
+
+  .edu{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:4mm;
+    margin-bottom:1.8mm;
+  }
+  .edu h3{
+    font-family:'Archivo','Segoe UI',sans-serif;
+    font-size:3.3mm;
+    font-weight:700;
+    line-height:1.3;
+  }
+  .edu p{
+    font-size:2.95mm;
+    color:var(--ink-3);
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <h1 class="name">Sofia Marques</h1>
+    <div class="role">Content &amp; Localization Specialist</div>
+    <div class="contact">
+      Lisbon, Portugal<span class="sep">|</span>+351 900 000 000<span class="sep">|</span>sofia.marques@example.com<span class="sep">|</span>linkedin.com/in/example
+    </div>
+    <!-- delete if there is nothing a recruiter must know upfront -->
+    <div class="highlight">EU Work Authorization · Open to remote &amp; hybrid</div>
+  </header>
+
+  <section>
+    <h2>Summary</h2>
+    <p class="summary">Content specialist with seven years writing, editing and localizing for education and fintech brands. Owned the English to Portuguese pipeline for a 40-course catalog and rebuilt the editorial workflow that cut review time in half. Looking for a content or localization role where quality is measured, not assumed.</p>
+  </section>
+
+  <section>
+    <h2>Experience</h2>
+
+    <article class="job">
+      <div class="job-top">
+        <div class="job-title">Content Analyst <em>· Halden Learning Group</em></div>
+        <div class="date">Mar 2020 – Jun 2026</div>
+      </div>
+      <ul>
+        <li><b>Editorial:</b> Wrote and edited course pages, newsletters and leadership communications for three business units, keeping one brand voice across 12 authors.</li>
+        <li><b>Localization:</b> Ran English to Portuguese translation for a 40-course catalog, building the glossary and QA checklist the vendors still use.</li>
+        <li><b>Workflow:</b> Moved review from email threads to a shared tracker, cutting the average approval cycle from 9 to 4 days.</li>
+        <li><b>Channels:</b> Managed the company blog and LinkedIn page, growing followers from 6k to 21k.</li>
+      </ul>
+    </article>
+
+    <article class="job">
+      <div class="job-top">
+        <div class="job-title">Marketing &amp; Content Specialist <em>· Larkspur Fintech</em></div>
+        <div class="date">Sep 2018 – Feb 2020</div>
+      </div>
+      <ul>
+        <li>Produced and translated technical articles explaining payments and compliance topics to non-specialist readers.</li>
+        <li>Designed social and email assets for four product launches.</li>
+      </ul>
+    </article>
+
+    <article class="job">
+      <div class="job-top">
+        <div class="job-title">Customer Support Representative <em>· Atlas Contact Center</em></div>
+        <div class="date">May 2015 – Dec 2017</div>
+      </div>
+      <ul>
+        <li>Resolved high-volume inbound requests with a first-contact resolution rate above team target for 10 consecutive quarters.</li>
+        <li>Kept CRM records accurate under strict SLA and quality-audit rules.</li>
+      </ul>
+    </article>
+  </section>
+
+  <section>
+    <h2>Skills</h2>
+    <div class="row"><div class="k">Content</div><div class="v">Copywriting, editing, content strategy, brand voice guidelines, SEO writing, email marketing</div></div>
+    <div class="row"><div class="k">Localization</div><div class="v">EN &gt; PT translation, transcreation, linguistic QA, terminology management</div></div>
+    <div class="row"><div class="k">Tools</div><div class="v">Google Workspace, Microsoft 365, WordPress, HubSpot, Figma</div></div>
+    <div class="row"><div class="k">Languages</div><div class="v">Portuguese (native), English (fluent), Spanish (intermediate)</div></div>
+  </section>
+
+  <section>
+    <h2>Education</h2>
+    <div class="edu">
+      <div>
+        <h3>Postgraduate Certificate in Digital Communication</h3>
+        <p>University of Lisbon (example)</p>
+      </div>
+      <div class="date">2019 – 2020</div>
+    </div>
+    <div class="edu">
+      <div>
+        <h3>BA in Communication, Editorial Production</h3>
+        <p>University of Lisbon (example)</p>
+      </div>
+      <div class="date">2014 – 2017</div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

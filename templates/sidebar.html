@@ -1,0 +1,591 @@
+<!doctype html>
+<!--
+  fired.cv / templates/sidebar.html
+  Two-column resume, one A4 page. Colored sidebar (photo, contact, skills,
+  languages) + white main column (summary, experience timeline, education).
+
+  HOW TO FILL
+  - Replace the example person (Sofia Marques, fictional) with the real content.
+  - Repeat or delete whole blocks: <article class="job">, <li>, <div class="lang">,
+    <div class="edu">. Never leave an empty block behind.
+  - Color: set <html data-theme="..."> to one of the themes below (ember, ocean,
+    jade, graphite, plum), or edit a theme block. build.mjs --theme previews one,
+    --themes renders every theme side by side.
+  - Photo: keep the monogram (initials) or replace the <div class="monogram">
+    with <img class="photo" src="data:image/jpeg;base64,..." alt="">.
+    scripts/build.mjs does this for you with --photo.
+  - Set <html lang> and the section titles to the language of the content.
+
+  RULES THAT BREAK SILENTLY (no error, broken PDF)
+  - letter-spacing above ~0.1em of the font size splits words letter by letter in
+    the PDF text layer: resume parsers read "E X P E R I E N C E". Keep it small.
+  - text-shadow on text makes Chrome draw the glyphs twice: the name shows up
+    duplicated when someone copies the text or a parser reads the file. Never.
+  - Chrome writes the PDF text in paint order, not DOM order. position:relative
+    on some blocks and not on their siblings moves headings away from their
+    content in the text layer. Keep siblings uniform (see .side > * and .main > *).
+-->
+<html lang="en" data-theme="ember">
+<head>
+<meta charset="utf-8">
+<title>Sofia Marques - Resume</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=block" rel="stylesheet">
+<style>
+  /* ============================ THEMES ============================
+     Each theme is two families: the sidebar gradient (--side-*) and the accent
+     used in the main column (--accent*). Usually the same hue; graphite pairs a
+     charcoal sidebar with a bronze accent. White text sits on the sidebar, so
+     keep --side-top dark enough to read. */
+  :root,
+  html[data-theme="ember"]{       /* orange: warm, energetic, creative and communication roles */
+    --side-top:    #FF8A33;
+    --side-mid:    #FF6A00;
+    --side-bottom: #D14602;
+    --accent:      #FF6A00;   /* ticks, timeline */
+    --accent-deep: #D14602;   /* dates */
+    --accent-lite: #FF8A33;   /* bullets */
+    --accent-tint: #FFF1E7;   /* summary card, date pills */
+  }
+  html[data-theme="ocean"]{       /* blue: trustworthy, tech, operations, public sector */
+    --side-top:    #2F7FD8;
+    --side-mid:    #1C63BE;
+    --side-bottom: #123F82;
+    --accent:      #1C63BE;
+    --accent-deep: #154C93;
+    --accent-lite: #3A86DB;
+    --accent-tint: #EAF2FC;
+  }
+  html[data-theme="jade"]{        /* green: health, education, sustainability, finance */
+    --side-top:    #1E9A7A;
+    --side-mid:    #127C62;
+    --side-bottom: #0A4F3F;
+    --accent:      #127C62;
+    --accent-deep: #0C624D;
+    --accent-lite: #23A383;
+    --accent-tint: #E5F3EF;
+  }
+  html[data-theme="graphite"]{    /* charcoal + bronze: senior, legal, consulting, executive */
+    --side-top:    #4A4F57;
+    --side-mid:    #33373D;
+    --side-bottom: #1D2024;
+    --accent:      #A8804A;
+    --accent-deep: #8A6536;
+    --accent-lite: #BF9A64;
+    --accent-tint: #F5EFE6;
+  }
+  html[data-theme="plum"]{        /* wine: fashion, beauty, hospitality, culture */
+    --side-top:    #A34A80;
+    --side-mid:    #85336A;
+    --side-bottom: #521D41;
+    --accent:      #85336A;
+    --accent-deep: #6D2856;
+    --accent-lite: #A6528A;
+    --accent-tint: #F6EAF2;
+  }
+
+  :root{
+    --ink:         #17161A;
+    --ink-2:       #3D3A38;
+    --ink-3:       #6B6663;
+    --rule:        #EBE5E0;
+    --sidebar-w:   61mm;
+  }
+
+  @page { size: A4; margin: 0; }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  html,body{
+    width:210mm;
+    background:#fff;
+    font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
+    color:var(--ink);
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .page{
+    width:210mm;
+    min-height:297mm;   /* min, not fixed: overflow must spill to page 2 so the build catches it */
+    display:grid;
+    grid-template-columns:var(--sidebar-w) 1fr;
+    position:relative;
+    overflow:hidden;
+  }
+
+  /* ============================ SIDEBAR ============================ */
+  .side{
+    position:relative;
+    background:linear-gradient(168deg,var(--side-top) 0%,var(--side-mid) 34%,var(--side-bottom) 100%);
+    color:#fff;
+    padding:0 7mm 8mm;
+    overflow:hidden;
+  }
+  /* soft light sweep so the color block isn't a flat slab */
+  .side::before{
+    content:"";
+    position:absolute; inset:0;
+    background:
+      radial-gradient(120% 55% at 12% 4%, rgba(255,255,255,.28), transparent 62%),
+      radial-gradient(90% 45% at 95% 100%, rgba(0,0,0,.18), transparent 60%);
+    pointer-events:none;
+  }
+  .side > *{ position:relative; }
+
+  /* --- photo / monogram --- */
+  .photo-wrap{
+    width:33mm; height:33mm;
+    margin:7mm auto 0;
+    border-radius:50%;
+    padding:1.4mm;
+    background:rgba(255,255,255,.92);
+    box-shadow:0 3mm 7mm rgba(0,0,0,.20);
+  }
+  .photo{
+    width:100%; height:100%;
+    border-radius:50%;
+    object-fit:cover;
+    object-position:center 22%;
+    display:block;
+  }
+  .monogram{
+    width:100%; height:100%;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--accent-tint);
+    color:var(--accent-deep);
+    font-family:'Archivo','Segoe UI',sans-serif;
+    font-weight:700; font-size:13mm; letter-spacing:.3mm;
+  }
+
+  /* --- name --- */
+  .name{
+    font-family:'Archivo','Segoe UI',sans-serif;
+    font-weight:800;
+    font-size:8.5mm;
+    line-height:1.04;
+    letter-spacing:-.22mm;
+    text-align:center;
+    margin-top:4.6mm;
+  }
+  .name span{ display:block; }
+  .name .last{ font-weight:500; opacity:.94; font-size:5.6mm; letter-spacing:.05mm; margin-top:1.2mm; }
+
+  .role{
+    text-align:center;
+    font-size:2.9mm;
+    font-weight:600;
+    line-height:1.3;
+    margin-top:2.4mm;
+    opacity:.95;
+  }
+
+  .name-rule{
+    width:16mm; height:.9mm;
+    background:rgba(255,255,255,.75);
+    border-radius:1mm;
+    margin:2.8mm auto 0;
+  }
+
+  /* --- sidebar sections --- */
+  .s-head{
+    font-family:'Archivo','Segoe UI',sans-serif;
+    font-size:2.8mm;
+    font-weight:700;
+    letter-spacing:.3mm;
+    text-transform:uppercase;
+    color:rgba(255,255,255,.97);
+    padding-bottom:1.6mm;
+    margin:4.6mm 0 2.5mm;
+    border-bottom:.4mm solid rgba(255,255,255,.42);
+  }
+
+  .field{ margin-bottom:2.5mm; }
+  .field dt{
+    font-size:2.5mm;
+    font-weight:600;
+    letter-spacing:.2mm;
+    text-transform:uppercase;
+    color:rgba(255,255,255,.74);
+    margin-bottom:.5mm;
+  }
+  .field dd{
+    font-size:3.0mm;
+    line-height:1.3;
+    font-weight:500;
+    word-break:break-word;
+  }
+
+  /* work permit, availability, relocation: the one line a recruiter must not miss */
+  .highlight{
+    margin-top:3.4mm;
+    padding:2mm 2.4mm;
+    border-radius:1.6mm;
+    background:rgba(255,255,255,.17);
+    border:.3mm solid rgba(255,255,255,.38);
+    font-size:2.7mm;
+    line-height:1.28;
+    font-weight:600;
+    text-align:center;
+  }
+
+  .side ul{ list-style:none; }
+  /* bullets are a background dot, not a positioned ::before: see the paint-order rule */
+  .side li{
+    font-size:2.95mm;
+    line-height:1.32;
+    padding-left:3.4mm;
+    margin-bottom:1.15mm;
+    font-weight:450;
+    background:radial-gradient(circle, rgba(255,255,255,.92) 0 .72mm, transparent .78mm) no-repeat 0 .95mm / 1.5mm 1.5mm;
+  }
+
+  /* --- languages --- */
+  .lang{ margin-bottom:1.8mm; }
+  .lang-top{
+    display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom:1.1mm;
+  }
+  .lang-name{ font-size:2.95mm; font-weight:600; }
+  .lang-lvl{ font-size:2.6mm; font-weight:500; opacity:.86; }
+  .bar{
+    height:1.1mm;
+    border-radius:1mm;
+    background:rgba(255,255,255,.30);
+    overflow:hidden;
+  }
+  .bar i{ display:block; height:100%; background:#fff; border-radius:1mm; }
+
+  /* ============================= MAIN ============================= */
+  .main{
+    position:relative;
+    padding:7mm 10mm 6mm 9mm;
+  }
+  /* Chrome writes the PDF text layer in PAINT order, and positioned boxes paint
+     after static ones. Mixing the two made parsers read "EXPERIENCE EDUCATION"
+     before any job. Every block here is positioned, so paint order = reading order. */
+  .main > *{ position:relative; }
+
+  .profile{
+    position:relative;
+    background:var(--accent-tint);
+    border-radius:2.4mm;
+    padding:4mm 4.6mm 4mm 5.8mm;
+    margin-bottom:4.4mm;
+  }
+  .profile::before{
+    content:"";
+    position:absolute; left:0; top:0; bottom:0;
+    width:1.5mm;
+    border-radius:2.4mm 0 0 2.4mm;
+    background:linear-gradient(180deg,var(--accent-lite),var(--accent-deep));
+  }
+  .profile p{
+    font-size:3.0mm;
+    line-height:1.40;
+    color:var(--ink-2);
+  }
+
+  .m-head{
+    display:flex;
+    align-items:center;
+    gap:3mm;
+    margin-bottom:3.6mm;
+  }
+  .m-head h2{
+    font-family:'Archivo','Segoe UI',sans-serif;
+    font-size:3.8mm;
+    font-weight:700;
+    letter-spacing:.36mm;
+    text-transform:uppercase;
+    color:var(--ink);
+    white-space:nowrap;
+  }
+  .m-head .tick{
+    width:4.5mm; height:1.4mm;
+    border-radius:1mm;
+    background:var(--accent);
+    flex:none;
+  }
+  .m-head .line{
+    height:.3mm;
+    background:var(--rule);
+    flex:1;
+  }
+
+  /* --- experience timeline --- */
+  .track{
+    position:relative;
+    padding-left:6.4mm;
+  }
+  .track::before{
+    content:"";
+    position:absolute;
+    left:1.55mm; top:2.2mm; bottom:1.5mm;
+    width:.45mm;
+    background:linear-gradient(180deg,var(--accent) 0%,var(--accent-tint) 88%,transparent 100%);
+  }
+
+  .job{ position:relative; margin-bottom:3.4mm; }
+  .job:last-child{ margin-bottom:0; }
+  .job::before{
+    content:"";
+    position:absolute;
+    left:-6.4mm; top:1.5mm;
+    width:3.4mm; height:3.4mm;
+    border-radius:50%;
+    background:#fff;
+    border:.95mm solid var(--accent);
+    box-shadow:0 0 0 .7mm #fff;
+  }
+
+  .job-top{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:3.5mm;
+    margin-bottom:1.8mm;
+  }
+  .job-title{
+    font-family:'Archivo','Segoe UI',sans-serif;
+    font-size:3.45mm;
+    font-weight:700;
+    line-height:1.26;
+    color:var(--ink);
+  }
+  .job-title em{
+    font-style:normal;
+    font-weight:500;
+    color:var(--ink-3);
+  }
+  .date{
+    flex:none;
+    font-size:2.6mm;
+    font-weight:600;
+    letter-spacing:.12mm;
+    color:var(--accent-deep);
+    background:var(--accent-tint);
+    border-radius:6mm;
+    padding:.85mm 2.2mm;
+    white-space:nowrap;
+  }
+
+  .job ul{ list-style:none; }
+  .job li{
+    padding-left:3.2mm;
+    font-size:2.95mm;
+    line-height:1.38;
+    color:var(--ink-2);
+    margin-bottom:.9mm;
+    background:radial-gradient(circle, var(--accent-lite) 0 .62mm, transparent .68mm) no-repeat 0 1.4mm / 1.3mm 1.3mm;
+  }
+  .job li:last-child{ margin-bottom:0; }
+  .job li b{
+    font-weight:600;
+    color:var(--ink);
+  }
+
+  /* --- education --- */
+  .edu-wrap{ margin-top:4mm; }
+  .edu{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:4mm;
+    padding:1.7mm 0 1.7mm 3.6mm;
+    border-left:.9mm solid var(--accent-tint);
+  }
+  .edu + .edu{ margin-top:1mm; }
+  .edu h3{
+    font-family:'Archivo','Segoe UI',sans-serif;
+    font-size:3.3mm;
+    font-weight:700;
+    line-height:1.28;
+    color:var(--ink);
+    margin-bottom:.9mm;
+  }
+  .edu p{
+    font-size:2.9mm;
+    color:var(--ink-3);
+    font-weight:500;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ========================= SIDEBAR ========================= -->
+  <aside class="side">
+
+    <div class="photo-wrap"><div class="monogram">SM</div></div>
+
+    <div class="name">
+      <span>Sofia</span>
+      <span class="last">Marques</span>
+    </div>
+    <div class="role">Content &amp; Localization Specialist</div>
+    <div class="name-rule"></div>
+
+    <h2 class="s-head">Contact</h2>
+    <dl>
+      <div class="field"><dt>Location</dt><dd>Lisbon, Portugal</dd></div>
+      <div class="field"><dt>Phone</dt><dd>+351 900 000 000</dd></div>
+      <div class="field"><dt>Email</dt><dd>sofia.marques@example.com</dd></div>
+      <div class="field"><dt>LinkedIn</dt><dd>linkedin.com/in/example</dd></div>
+    </dl>
+    <!-- delete this box if there is nothing a recruiter must know upfront -->
+    <div class="highlight">EU Work Authorization<br>Open to remote &amp; hybrid</div>
+
+    <!-- skills: 2 to 4 groups, 3 to 6 items each, most relevant group first -->
+    <h2 class="s-head">Content &amp; Editorial</h2>
+    <ul>
+      <li>Copywriting &amp; Editing</li>
+      <li>Content Strategy</li>
+      <li>Brand Voice Guidelines</li>
+      <li>SEO Writing</li>
+      <li>Email Marketing</li>
+    </ul>
+
+    <h2 class="s-head">Localization</h2>
+    <ul>
+      <li>EN &gt; PT Translation</li>
+      <li>Transcreation</li>
+      <li>Linguistic QA</li>
+      <li>Terminology Management</li>
+    </ul>
+
+    <h2 class="s-head">Tools</h2>
+    <ul>
+      <li>Google Workspace</li>
+      <li>Microsoft 365</li>
+      <li>WordPress &amp; HubSpot</li>
+      <li>Figma</li>
+    </ul>
+
+    <!-- languages: bar width is honest, not flattering (native 100, fluent ~85, intermediate ~55, basic ~30) -->
+    <h2 class="s-head">Languages</h2>
+    <div class="lang">
+      <div class="lang-top"><span class="lang-name">Portuguese</span><span class="lang-lvl">Native</span></div>
+      <div class="bar"><i style="width:100%"></i></div>
+    </div>
+    <div class="lang">
+      <div class="lang-top"><span class="lang-name">English</span><span class="lang-lvl">Fluent</span></div>
+      <div class="bar"><i style="width:88%"></i></div>
+    </div>
+    <div class="lang">
+      <div class="lang-top"><span class="lang-name">Spanish</span><span class="lang-lvl">Intermediate</span></div>
+      <div class="bar"><i style="width:55%"></i></div>
+    </div>
+
+  </aside>
+
+  <!-- ========================== MAIN ========================== -->
+  <main class="main">
+
+    <!-- summary: 3 to 4 lines. Who, for what, proof. No "passionate", no "team player". -->
+    <section class="profile">
+      <p>Content specialist with seven years writing, editing and localizing for education and fintech brands. Owned the English to Portuguese pipeline for a 40-course catalog and rebuilt the editorial workflow that cut review time in half. Looking for a content or localization role where quality is measured, not assumed.</p>
+    </section>
+
+    <div class="m-head"><span class="tick"></span><h2>Experience</h2><span class="line"></span></div>
+
+    <div class="track">
+
+      <!-- one <article class="job"> per role, most recent first -->
+      <article class="job">
+        <div class="job-top">
+          <div class="job-title">Content Analyst <em>/ Halden Learning Group</em></div>
+          <div class="date">Mar 2020 – Jun 2026</div>
+        </div>
+        <ul>
+          <li><b>Editorial:</b> Wrote and edited course pages, newsletters and leadership communications for three business units, keeping one brand voice across 12 authors.</li>
+          <li><b>Localization:</b> Ran English to Portuguese translation for a 40-course catalog, building the glossary and QA checklist the vendors still use.</li>
+          <li><b>Workflow:</b> Moved review from email threads to a shared tracker, cutting the average approval cycle from 9 to 4 days.</li>
+          <li><b>Channels:</b> Managed the company blog and LinkedIn page, growing followers from 6k to 21k.</li>
+        </ul>
+      </article>
+
+      <article class="job">
+        <div class="job-top">
+          <div class="job-title">Marketing &amp; Content Specialist <em>/ Larkspur Fintech</em></div>
+          <div class="date">Sep 2018 – Feb 2020</div>
+        </div>
+        <ul>
+          <li>Produced and translated technical articles explaining payments and compliance topics to non-specialist readers.</li>
+          <li>Designed social and email assets for four product launches.</li>
+          <li>Handled the public inbox and community channels, escalating product issues to the support team.</li>
+          <li>Wrote the style guide and glossary used by the two freelance writers hired after launch.</li>
+        </ul>
+      </article>
+
+      <article class="job">
+        <div class="job-top">
+          <div class="job-title">Creative Intern <em>/ Corvo Media</em></div>
+          <div class="date">Jan 2018 – Aug 2018</div>
+        </div>
+        <ul>
+          <li>Wrote ad copy and email campaigns for retail and hospitality clients.</li>
+        </ul>
+      </article>
+
+      <article class="job">
+        <div class="job-top">
+          <div class="job-title">Customer Support Representative <em>/ Atlas Contact Center</em></div>
+          <div class="date">May 2015 – Dec 2017</div>
+        </div>
+        <ul>
+          <li>Resolved high-volume inbound requests with a first-contact resolution rate above team target for 10 consecutive quarters.</li>
+          <li>Kept CRM records accurate under strict SLA and quality-audit rules.</li>
+        </ul>
+      </article>
+
+    </div>
+
+    <div class="edu-wrap">
+      <div class="m-head"><span class="tick"></span><h2>Education</h2><span class="line"></span></div>
+
+      <div class="edu">
+        <div>
+          <h3>Postgraduate Certificate in Digital Communication</h3>
+          <p>University of Lisbon (example)</p>
+        </div>
+        <div class="date">2019 – 2020</div>
+      </div>
+
+      <div class="edu">
+        <div>
+          <h3>BA in Communication, Editorial Production</h3>
+          <p>University of Lisbon (example)</p>
+        </div>
+        <div class="date">2014 – 2017</div>
+      </div>
+    </div>
+
+    <!-- optional: certifications, courses, publications, volunteer work. Delete if empty. -->
+    <div class="edu-wrap">
+      <div class="m-head"><span class="tick"></span><h2>Certifications</h2><span class="line"></span></div>
+
+      <div class="edu">
+        <div>
+          <h3>Content Marketing Certification</h3>
+          <p>HubSpot Academy</p>
+        </div>
+        <div class="date">2023</div>
+      </div>
+
+      <div class="edu">
+        <div>
+          <h3>Translation Technology &amp; CAT Tools</h3>
+          <p>Online course, 40 hours (example)</p>
+        </div>
+        <div class="date">2021</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>
