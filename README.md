@@ -1,5 +1,7 @@
 # fired.cv
 
+<a href="https://sapiensinteticos.com/fired-cv"><img src="site/img/readme-hero.png" alt="fired.cv landing page: Fired by AI. CV by AI." width="100%"></a>
+
 **Fired by AI. CV by AI.** A resume skill for AI agents: hand it your old Word resume, get back one A4 page that looks expensive, reads clean to the robots that screen it, and invents nothing. Then get one of those for every job you apply to.
 
 > **AI agent reading this?** Your instructions are in [SKILL.md](SKILL.md). Follow that file; the templates and scripts it uses are next to it.

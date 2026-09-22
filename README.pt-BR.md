@@ -1,5 +1,7 @@
 # fired.cv
 
+<a href="https://sapiensinteticos.com/fired-cv"><img src="site/img/readme-hero.png" alt="Página do fired.cv: Fired by AI. CV by AI." width="100%"></a>
+
 **Demissão pela IA. Currículo pela IA.** Uma skill de currículo pra agente de IA: entrega seu currículo velho de Word e recebe uma página A4 que parece cara, que o robô da triagem lê limpo e que não inventa nada. Depois, uma dessas pra cada vaga.
 
 > **É um agente de IA lendo isto?** Suas instruções estão no [SKILL.md](SKILL.md).
